@@ -1,6 +1,6 @@
 {
   "name": "postcss-icss-values",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "PostCSS plugin for CSS Modules to pass arbitrary values between your module files",
   "main": "lib/index.js",
   "files": [
@@ -8,9 +8,7 @@
   ],
   "scripts": {
     "build": "babel --out-dir lib src",
-    "test": "jest --coverage",
-    "precommit": "lint-staged",
-    "prepublish": "yarn run test && yarn run build"
+    "test": "jest --coverage"
   },
   "lint-staged": {
     "*.js": [
@@ -55,14 +53,16 @@
     "eslint": "^4.0.0",
     "husky": "^0.13.4",
     "jest": "^20.0.4",
-    "lint-staged": "^3.6.1",
+    "postcss": "^8.1.1",
     "prettier": "^1.4.4",
     "strip-indent": "^2.0.0"
   },
   "dependencies": {
-    "icss-utils": "^3.0.1",
+    "icss-utils": "^5.0.0-rc.0",
     "lodash": "^4.17.4",
-    "postcss": "^6.0.2",
-    "postcss-value-parser": "^3.3.0"
+    "postcss-value-parser": "^4.1.0"
+  },
+  "peerDependencies": {
+    "postcss": "^8.1.1"
   }
 }

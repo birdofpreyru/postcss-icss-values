@@ -12,7 +12,7 @@ import dropWhile from "lodash/dropWhile";
 import dropRightWhile from "lodash/dropRightWhile";
 import fromPairs from "lodash/fromPairs";
 
-const plugin = "postcss-icss-values";
+const PLUGIN_NAME = "postcss-icss-values";
 
 const chunkBy = (collection, iteratee) =>
   collection.reduce(
@@ -107,73 +107,81 @@ const getScopedAliases = (messages, values) =>
 
 const getMessages = exports =>
   Object.keys(exports).map(name => ({
-    plugin: "postcss-icss-values",
+    plugin: PLUGIN_NAME,
     type: "icss-value",
     name,
     value: exports[name]
   }));
 
-module.exports = postcss.plugin(plugin, () => (css, result) => {
-  const { icssImports, icssExports } = extractICSS(css);
-  const valuesExports = {};
-  const getAliasName = createGenerator();
-  const addExports = (node, name, value) => {
-    if (isForbidden(name)) {
-      result.warn(`Dot and hash symbols are not allowed in value "${name}"`, {
-        node
-      });
-    }
-    if (valuesExports[name]) {
-      result.warn(`"${name}" value already declared`, { node });
-    }
-    valuesExports[name] = replaceValueSymbols(value, valuesExports);
-  };
+module.exports = () => ({
+  postcssPlugin: PLUGIN_NAME,
+  Once: (css, { postcss, result }) => {
+    const { icssImports, icssExports } = extractICSS(css);
+    const valuesExports = {};
+    const getAliasName = createGenerator();
+    const addExports = (node, name, value) => {
+      if (isForbidden(name)) {
+        result.warn(`Dot and hash symbols are not allowed in value "${name}"`, {
+          node
+        });
+      }
+      if (valuesExports[name]) {
+        result.warn(`"${name}" value already declared`, { node });
+      }
+      valuesExports[name] = replaceValueSymbols(value, valuesExports);
+    };
 
-  css.walkAtRules("value", atrule => {
-    if (atrule.params.indexOf("@value") !== -1) {
-      result.warn(`Invalid value definition "${atrule.params}"`, {
-        node: atrule
-      });
-    } else {
-      const parsed = parse(atrule.params);
-      if (parsed) {
-        if (parsed.type === "value") {
-          const { name, value } = parsed;
-          addExports(atrule, name, value);
-        }
-        if (parsed.type === "import") {
-          const pairs = parsed.pairs.map(([imported, local]) => {
-            const alias = getAliasName(local);
-            addExports(atrule, local, alias);
-            return [alias, imported];
-          });
-          const aliases = fromPairs(pairs);
-          icssImports[parsed.path] = Object.assign(
-            {},
-            icssImports[parsed.path],
-            aliases
-          );
-        }
-      } else {
+    css.walkAtRules("value", atrule => {
+      if (atrule.params.indexOf("@value") !== -1) {
         result.warn(`Invalid value definition "${atrule.params}"`, {
           node: atrule
         });
+      } else {
+        const parsed = parse(atrule.params);
+        if (parsed) {
+          if (parsed.type === "value") {
+            const { name, value } = parsed;
+            addExports(atrule, name, value);
+          }
+          if (parsed.type === "import") {
+            const pairs = parsed.pairs.map(([imported, local]) => {
+              const alias = getAliasName(local);
+              addExports(atrule, local, alias);
+              return [alias, imported];
+            });
+            const aliases = fromPairs(pairs);
+            icssImports[parsed.path] = Object.assign(
+              {},
+              icssImports[parsed.path],
+              aliases
+            );
+          }
+        } else {
+          result.warn(`Invalid value definition "${atrule.params}"`, {
+            node: atrule
+          });
+        }
       }
-    }
-    atrule.remove();
-  });
+      atrule.remove();
+    });
 
-  const scopedAliases = getScopedAliases(result.messages, valuesExports);
+    const scopedAliases = getScopedAliases(result.messages, valuesExports);
 
-  replaceSymbols(css, Object.assign({}, valuesExports, scopedAliases));
+    replaceSymbols(css, Object.assign({}, valuesExports, scopedAliases));
 
-  Object.keys(icssExports).forEach(key => {
-    icssExports[key] = replaceValueSymbols(icssExports[key], scopedAliases);
-  });
+    Object.keys(icssExports).forEach(key => {
+      icssExports[key] = replaceValueSymbols(icssExports[key], scopedAliases);
+    });
 
-  css.prepend(
-    createICSSRules(icssImports, Object.assign({}, icssExports, valuesExports))
-  );
+    css.prepend(
+      createICSSRules(
+        icssImports,
+        Object.assign({}, icssExports, valuesExports),
+        postcss)
+    );
 
-  result.messages.push(...getMessages(valuesExports));
+    result.messages.push(...getMessages(valuesExports));
+  },
 });
+
+module.exports.postcss = true;
