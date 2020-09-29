@@ -1,5 +1,5 @@
 {
-  "name": "postcss-icss-values",
+  "name": "@dr.pogodin/postcss-icss-values",
   "version": "2.1.0",
   "description": "PostCSS plugin for CSS Modules to pass arbitrary values between your module files",
   "main": "lib/index.js",
@@ -36,13 +36,13 @@
       ]
     ]
   },
-  "repository": "css-modules/postcss-icss-values",
+  "repository": "birdofpreyru/postcss-icss-values",
   "keywords": [
     "css",
     "modules",
     "postcss"
   ],
-  "author": "Glen Maddern and Bogdan Chadkin",
+  "author": "Dr. Sergey Pogodin",
   "license": "MIT",
   "devDependencies": {
     "@babel/cli": "^7.11.6",
