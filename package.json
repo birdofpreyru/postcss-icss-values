@@ -29,11 +29,9 @@
   "babel": {
     "presets": [
       [
-        "env",
+        "@babel/env",
         {
-          "targets": {
-            "node": 4
-          }
+          "targets": "current node"
         }
       ]
     ]
@@ -47,15 +45,15 @@
   "author": "Glen Maddern and Bogdan Chadkin",
   "license": "MIT",
   "devDependencies": {
-    "babel-cli": "^6.5.2",
-    "babel-jest": "^20.0.3",
-    "babel-preset-env": "^1.5.2",
-    "eslint": "^4.0.0",
-    "husky": "^0.13.4",
-    "jest": "^20.0.4",
+    "@babel/cli": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
+    "babel-jest": "^26.3.0",
+    "eslint": "^7.10.0",
+    "husky": "^4.3.0",
+    "jest": "^26.4.2",
     "postcss": "^8.1.1",
-    "prettier": "^1.4.4",
-    "strip-indent": "^2.0.0"
+    "prettier": "^2.1.2",
+    "strip-indent": "^3.0.0"
   },
   "dependencies": {
     "icss-utils": "^5.0.0-rc.0",
